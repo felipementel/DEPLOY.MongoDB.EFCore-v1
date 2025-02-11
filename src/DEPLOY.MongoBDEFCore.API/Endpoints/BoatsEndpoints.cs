@@ -1,9 +1,9 @@
 ﻿using Asp.Versioning;
 using DEPLOY.MongoBDEFCore.API.Domain;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
 
 namespace DEPLOY.MongoBDEFCore.API.Endpoints
 {
@@ -23,7 +23,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 .WithApiVersionSet(apiVersionSetAdocoes);
 
 
-            app.MapPost("/boat", async (MongoDBContext context, Boat boat) =>
+            app.MapPost("/boat", async (MongoDBContext context, 
+                [FromBody] Boat boat) =>
             {
                 context.Boats.Add(new Boat { Name = boat.Name, Size = boat.Size, License = true });
                 await context.SaveChangesAsync();
@@ -62,9 +63,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 return TypedResults.Ok(items);
             });
 
-            app.MapDelete("/boat/{boatName}", async
-                (MongoDBContext context,
-                string boatName,
+            app.MapGet("/boat/{boatName}", async (MongoDBContext context,
+                [FromRoute] string boatName,
                 CancellationToken cancellationToken = default) =>
             {
                 var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boatName, cancellationToken);
@@ -74,16 +74,27 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                     return Results.NotFound();
                 }
 
-                context.Boats.Remove(boat);
-                await context.SaveChangesAsync();
-
-                return TypedResults.Ok();
+                return TypedResults.Ok(boat);
             });
 
-            app.MapDelete("/boat/id/{id}", async
+            app.MapGet("/boatbyid/{id}", async
                 (MongoDBContext context,
-                string id,
+                [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
+            {
+                var boat = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+                if (boat == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return TypedResults.Ok(boat);
+            });
+
+            app.MapDelete("/boat/{id}", async (MongoDBContext context,
+               [FromRoute] string id,
+               CancellationToken cancellationToken = default) =>
             {
                 var boat = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -98,24 +109,28 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 return TypedResults.Ok();
             });
 
-            app.MapPut("/boat/{boatName}", async (
-                MongoDBContext context,
-                string boatName,
+            app.MapPut("/boat/{id}", async (MongoDBContext context,
+                [FromRoute] string id,
+                [FromBody] Boat boat,
                 CancellationToken cancellationToken = default) =>
             {
-                var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boatName, cancellationToken);
+                var boatActual = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                 if (boat == null)
                 {
                     return Results.NotFound();
                 }
 
-                boat.License = false;
+                boatActual!.Name = boat.Name;
+                boatActual.Size = boat.Size;
+                boatActual.License = boat.License;
+
                 await context.SaveChangesAsync();
-                return TypedResults.Ok();
+                return TypedResults.NoContent();
             });
 
-            async Task<IResult> GetBoat(MongoDBContext context, string boatName)
+            async Task<IResult> GetBoat(MongoDBContext context, 
+                string boatName)
             {
                 var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boatName);
 

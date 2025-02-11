@@ -1,10 +1,10 @@
 ﻿using Asp.Versioning;
 using DEPLOY.MongoBDEFCore.API.Domain;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
-using System.Runtime.CompilerServices;
 
 namespace DEPLOY.MongoBDEFCore.API.Endpoints
 {
@@ -24,8 +24,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 .WithApiVersionSet(apiVersionSetAdocoes);
 
 
-
-            app.MapPost("/marina", async (MongoDBContext context, Marina marina) =>
+            app.MapPost("/marina", async (MongoDBContext context,
+                [FromBody] Marina marina) =>
             {
                 context.Marinas.Add(new Marina { Name = marina.Name });
                 await context.SaveChangesAsync();
@@ -41,10 +41,10 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 OperationId = "marina-post",
                 Summary = "create a marina",
                 Description = "process do register a new marina",
-                Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
+                Tags = new List<OpenApiTag> { new() { Name = "marina" } }
             });
 
-            app.MapGet("/marina", GetMarina)
+            app.MapGet("/marina", Getmarina)
             .Produces(201)
             .Produces(401)
             .Produces(422)
@@ -64,9 +64,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 return TypedResults.Ok(items);
             });
 
-            app.MapDelete("/marina/{marinaName}", async
-                (MongoDBContext context,
-                string marinaName,
+            app.MapGet("/marina/{marinaName}", async (MongoDBContext context,
+                [FromRoute] string marinaName,
                 CancellationToken cancellationToken = default) =>
             {
                 var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName, cancellationToken);
@@ -76,16 +75,27 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                     return Results.NotFound();
                 }
 
-                context.Marinas.Remove(marina);
-                await context.SaveChangesAsync();
-
-                return TypedResults.Ok();
+                return TypedResults.Ok(marina);
             });
 
-            app.MapDelete("/marina/id/{id}", async
+            app.MapGet("/marinabyid/{id}", async
                 (MongoDBContext context,
-                string id,
+                [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
+            {
+                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
+
+                if (marina == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return TypedResults.Ok(marina);
+            });
+
+            app.MapDelete("/marina/{id}", async (MongoDBContext context,
+               [FromRoute] string id,
+               CancellationToken cancellationToken = default) =>
             {
                 var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
@@ -100,23 +110,26 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 return TypedResults.Ok();
             });
 
-            app.MapPut("/marina/{marinaName}", async (
-                MongoDBContext context,
-                string marinaName,
+            app.MapPut("/marina/{id}", async (MongoDBContext context,
+                [FromRoute] string id,
+                [FromBody] Marina marina,
                 CancellationToken cancellationToken = default) =>
             {
-                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName, cancellationToken);
+                var marinaActual = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
                 if (marina == null)
                 {
                     return Results.NotFound();
                 }
 
+                marinaActual!.Name = marina.Name;
+
                 await context.SaveChangesAsync();
-                return TypedResults.Ok();
+                return TypedResults.NoContent();
             });
 
-            async Task<IResult> GetMarina(MongoDBContext context, string marinaName)
+            async Task<IResult> Getmarina(MongoDBContext context,
+                string marinaName)
             {
                 var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName);
 
