@@ -5,18 +5,21 @@ on:
 
 jobs:
   get-project-version:
-    uses: felipementel/get-version-from-csproj/.github/workflows/get-version-from-csproj.yml@main
-    with:
-      csproj: "./src/DEPLOY.MongoDBEFCore.API/DEPLOY.MongoDBEFCore.API.csproj"
+    runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-version.outputs.version }}
+        version: ${{ steps.get-version.outputs.version }}
+    steps:
+    - name: get
+      uses: felipementel/get-version-from-csproj/.github/workflows/get-version-from-csproj.yml@main
+      with:
+        csproj: "./src/DEPLOY.MongoDBEFCore.API/DEPLOY.MongoDBEFCore.API.csproj"      
 
   build-and-deploy:
     needs: get-project-version
     runs-on: ubuntu-latest
     steps:
       - name: Exibir versão extraída
-        run: echo "Versão extraída: ${{ needs.get-project-version.outputs.version }}"
+        run: echo "Versão extraída:" ${{ needs.get-project-version.outputs.version }}"
 
       - name: Criar Tag no GitHub
         run: |
