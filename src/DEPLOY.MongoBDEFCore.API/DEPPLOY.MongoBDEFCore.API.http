@@ -1,0 +1,11 @@
+@DEPPLOY.MongoBDEFCore.API_HostAddress = http://localhost:5141
+
+POST {{DEPPLOY.MongoBDEFCore.API_HostAddress}}/test/
+Content-Type: application/json
+  {
+      "Name": "Test",
+      "Size": 10,
+      "License": true
+  }
+
+###
