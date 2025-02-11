@@ -28,7 +28,7 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 context.Boats.Add(new Boat { Name = boat.Name, Size = boat.Size, License = true });
                 await context.SaveChangesAsync();
 
-                return TypedResults.Created($"/boat/{boat.Name}", boat);
+                return TypedResults.Created($"/boat/id/{boat.Id}", boat);
             })
             .Produces(201)
             .Produces(401)
@@ -115,9 +115,9 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 return TypedResults.Ok();
             });
 
-            async Task<IResult> GetBoat(MongoDBContext context, string boarName)
+            async Task<IResult> GetBoat(MongoDBContext context, string boatName)
             {
-                var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boarName);
+                var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boatName);
 
                 if (boat == null)
                 {

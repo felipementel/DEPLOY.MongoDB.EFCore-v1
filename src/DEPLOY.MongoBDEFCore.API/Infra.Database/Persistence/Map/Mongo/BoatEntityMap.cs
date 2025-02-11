@@ -17,6 +17,12 @@ public static class BoatEntityMap
             .SetElementName("_id")
             .SetIdGenerator(StringObjectIdGenerator.Instance);
 
+            //map
+            //.MapIdProperty(i => i.Id)
+            //.SetElementName("_id")
+            //.SetIdGenerator(StringObjectIdGenerator.Instance)
+            //.SetSerializer(new StringSerializer(BsonType.ObjectId));
+
             map.
             MapMember(m => m.Name)
             .SetElementName("name");

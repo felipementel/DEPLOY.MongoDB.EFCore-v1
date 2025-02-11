@@ -10,11 +10,11 @@ Content-Type: application/json
 
 ###
 
-GET {{LocalHost}}/boat/ALARRIBA
+GET {{LocalHost}}/boat/all
 
 ###
 
-GET {{LocalHost}}/boat/id/ad4b41d6-1949-423b-829c-4d629a8d47d2
+GET {{LocalHost}}/boat/id/437ba1ec-6065-4ffb-9be9-25ed44121c29
 
 ###
 

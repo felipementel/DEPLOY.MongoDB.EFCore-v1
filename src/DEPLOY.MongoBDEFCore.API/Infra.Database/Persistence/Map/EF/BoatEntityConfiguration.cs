@@ -14,7 +14,7 @@ namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
         {
             builder.ToCollection("Boat");
 
-            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasBsonRepresentation(BsonType.ObjectId).HasValueGenerator<ObjectIdGenerator>();
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();//.HasBsonRepresentation(BsonType.ObjectId);//.HasValueGenerator<ObjectIdGenerator>().HasBsonRepresentation(BsonType.ObjectId);
         }
     }
 
