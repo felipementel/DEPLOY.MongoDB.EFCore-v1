@@ -1,7 +1,8 @@
 ﻿using DEPLOY.MongoBDEFCore.API.Domain;
+using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF;
 using Microsoft.EntityFrameworkCore;
 
-namespace DEPLOY.MongoBDEFCore.API
+namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence
 {
     public class MongoDBContext : DbContext
     {

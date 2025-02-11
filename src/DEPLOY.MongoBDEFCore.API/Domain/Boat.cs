@@ -4,7 +4,7 @@ namespace DEPLOY.MongoBDEFCore.API.Domain
 {
     public class Boat
     {
-        public ObjectId Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 
@@ -12,6 +12,6 @@ namespace DEPLOY.MongoBDEFCore.API.Domain
 
         public bool? License { get; set; }
 
-        public long? version { get; set; }
+        public long? Version { get; set; }
     }
 }

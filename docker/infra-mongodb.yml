@@ -16,9 +16,6 @@ services:
       - 27018:27017
     volumes:
       - /home/felipementel/docker/volumes/mongodb-efcore:/data/db
-    env_file:
-      - path: ./mongodb.env
-        required: true
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${ADMIN_MONGODB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${ADMIN_MONGODB_PASSWORD}
@@ -39,9 +36,6 @@ services:
     restart: always
     ports:
       - 8074:8081
-    env_file:
-      - path: ./mongodb.env
-        required: true
     depends_on:
       - mongodb-service
     environment:

@@ -1,0 +1,22 @@
+@LocalHost = http://localhost:7007
+
+POST {{LocalHost}}/boat/
+Content-Type: application/json
+  {
+      "Name": "ALARRIBA II",
+      "Size": 6,
+      "License": true
+  }
+
+###
+
+GET {{LocalHost}}/boat/ALARRIBA
+
+###
+
+GET {{LocalHost}}/boat/id/ad4b41d6-1949-423b-829c-4d629a8d47d2
+
+###
+
+PUT {{LocalHost}}/boat/id/5f6b3b3b7b3b3b3b3b3b3b3b
+
