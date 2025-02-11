@@ -5,14 +5,11 @@ on:
 
 jobs:
   get-project-version:
-    runs-on: ubuntu-latest
+    uses: felipementel/get-version-from-csproj/.github/workflows/get-version-from-csproj.yml@main
+    with:
+      csproj: "./src/DEPLOY.MongoDBEFCore.API/DEPLOY.MongoDBEFCore.API.csproj"
     outputs:
-        version: ${{ steps.get-version.outputs.version }}
-    steps:
-    - name: get
-      uses: felipementel/get-version-from-csproj/.github/workflows/get-version-from-csproj.yml@main
-      with:
-        csproj: "./src/DEPLOY.MongoDBEFCore.API/DEPLOY.MongoDBEFCore.API.csproj"      
+      version: ${{ steps.get-version.outputs.version }}  
 
   build-and-deploy:
     needs: get-project-version
