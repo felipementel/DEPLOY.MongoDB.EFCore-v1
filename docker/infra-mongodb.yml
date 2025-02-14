@@ -1,5 +1,5 @@
 # docker compose -f docker/infra-mongodb.yml --env-file ./docker/mongodb.env up
-# docker compose -f docker/infra-mongodb.yml down --volumes --remove-orphans
+# docker compose -f docker/infra-mongodb.yml --env-file ./docker/mongodb.env down --volumes --remove-orphans
 # docker stats --no-stream
 
 # docker system prune -a -f && docker volume prune -f && docker network prune -f && docker container prune -f
@@ -35,7 +35,7 @@ services:
     container_name: mongoexpress-container
     restart: always
     ports:
-      - 8074:8081
+      - 8077:8081
     depends_on:
       - mongodb-service
     environment:
@@ -44,6 +44,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb-container
       ME_CONFIG_BASICAUTH_USERNAME: ${BASICAUTH_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${BASICAUTH_PASSWORD}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
       ME_CONFIG_OPTIONS_EDITORTHEME: "dracula"
       ME_CONFIG_SITE_BASEURL: '/'
       ME_CONFIG_HEALTH_CHECK_PATH: '/status'

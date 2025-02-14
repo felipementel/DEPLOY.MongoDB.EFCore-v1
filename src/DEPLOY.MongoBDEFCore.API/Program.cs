@@ -34,14 +34,15 @@ SetupMap.ConfigureMaps();
 builder.Services.AddEntityFrameworkMongoDB()
     .AddDbContext<MongoDBContext>(options =>
     {
-        options.UseMongoDB(builder.Configuration.GetSection("BoatDatabase:ConnectionString").Value!, builder.Configuration.GetSection("BoatDatabase:DatabaseName").Value!);
+        options.UseMongoDB(
+            builder.Configuration.GetSection("BoatDatabase:ConnectionString").Value!,
+            builder.Configuration.GetSection("BoatDatabase:DatabaseName").Value!);
         options.LogTo(Console.WriteLine);
         options.EnableSensitiveDataLogging();
     });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -54,5 +55,6 @@ else
 
 //Endpoint
 app.MapBoatEndpoints();
+app.MapMarinasEndpoints();
 
 await app.RunAsync();

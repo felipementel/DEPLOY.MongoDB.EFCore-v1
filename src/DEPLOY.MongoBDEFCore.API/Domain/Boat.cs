@@ -4,7 +4,7 @@ namespace DEPLOY.MongoBDEFCore.API.Domain
 {
     public class Boat
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
         public string Name { get; set; }
 

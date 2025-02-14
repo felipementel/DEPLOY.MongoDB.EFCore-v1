@@ -27,41 +27,59 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
             app.MapPost("/marina", async (MongoDBContext context,
                 [FromBody] Marina marina) =>
             {
+                if (string.IsNullOrWhiteSpace(marina.Name))
+                {
+                    return Results.UnprocessableEntity("Name is required");
+                }
+
                 context.Marinas.Add(new Marina { Name = marina.Name });
                 await context.SaveChangesAsync();
 
                 return TypedResults.Created($"/marina/id/{marina.Id}", marina);
             })
             .Produces(201)
-            .Produces(401)
             .Produces(422)
             .Produces(500)
             .WithOpenApi(operation => new(operation)
             {
                 OperationId = "marina-post",
                 Summary = "create a marina",
-                Description = "process do register a new marina",
+                Description = "process to register a new marina",
                 Tags = new List<OpenApiTag> { new() { Name = "marina" } }
             });
 
-            app.MapGet("/marina", Getmarina)
+            app.MapGet("/marina", GetMarina)
             .Produces(201)
-            .Produces(401)
             .Produces(422)
             .Produces(500)
             .WithOpenApi(operation => new(operation)
             {
                 OperationId = "marina-get",
                 Summary = "get a marina",
-                Description = "process do get a marina",
-                Tags = new List<OpenApiTag> { new() { Name = "marina" } }
+                Description = "process to get a marina",
+                Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
             });
 
             app.MapGet("/marina/all", async (MongoDBContext context) =>
             {
                 var items = await context.Marinas.ToListAsync();
 
+                if (items.Count == 0)
+                {
+                    return Results.NotFound();
+                }
+
                 return TypedResults.Ok(items);
+            })
+            .Produces(200)
+            .Produces(404)
+            .Produces(500)
+            .WithOpenApi(operation => new(operation)
+            {
+                OperationId = "marina-all-get",
+                Summary = "get all marinas",
+                Description = "process to get all marinas",
+                Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
             });
 
             app.MapGet("/marina/{marinaName}", async (MongoDBContext context,
@@ -76,6 +94,16 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 }
 
                 return TypedResults.Ok(marina);
+            })
+            .Produces(200)
+            .Produces(404)
+            .Produces(500)
+            .WithOpenApi(operation => new(operation)
+            {
+                OperationId = "marina-by-name-get",
+                Summary = "get marina by name",
+                Description = "process to get marinas by name",
+                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
             });
 
             app.MapGet("/marinabyid/{id}", async
@@ -91,6 +119,16 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 }
 
                 return TypedResults.Ok(marina);
+            })
+            .Produces(200)
+            .Produces(404)
+            .Produces(500)
+            .WithOpenApi(operation => new(operation)
+            {
+                OperationId = "marina-by-id-get",
+                Summary = "get marina by id",
+                Description = "process to get marinas by id",
+                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
             });
 
             app.MapDelete("/marina/{id}", async (MongoDBContext context,
@@ -108,6 +146,16 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 await context.SaveChangesAsync();
 
                 return TypedResults.Ok();
+            })
+            .Produces(200)
+            .Produces(404)
+            .Produces(500)
+            .WithOpenApi(operation => new(operation)
+            {
+                OperationId = "marina-by-name-get",
+                Summary = "get marina by name",
+                Description = "process to get marinas by name",
+                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
             });
 
             app.MapPut("/marina/{id}", async (MongoDBContext context,
@@ -126,9 +174,19 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
 
                 await context.SaveChangesAsync();
                 return TypedResults.NoContent();
+            })
+            .Produces(204)
+            .Produces(404)
+            .Produces(500)
+            .WithOpenApi(operation => new(operation)
+            {
+                OperationId = "put-marina",
+                Summary = "update marina",
+                Description = "process to get marinas by name",
+                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
             });
 
-            async Task<IResult> Getmarina(MongoDBContext context,
+            async Task<IResult> GetMarina(MongoDBContext context,
                 string marinaName)
             {
                 var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName);

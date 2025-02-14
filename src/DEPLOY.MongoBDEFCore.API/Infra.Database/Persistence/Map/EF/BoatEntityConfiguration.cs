@@ -13,22 +13,28 @@ namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
         public void Configure(EntityTypeBuilder<Boat> builder)
         {
             builder.ToCollection("Boat");
+            builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Id).ValueGeneratedOnAdd();//.HasBsonRepresentation(BsonType.ObjectId);//.HasValueGenerator<ObjectIdGenerator>().HasBsonRepresentation(BsonType.ObjectId);
+            //builder.Property(x => x.Id).ValueGeneratedOnAdd().HasBsonRepresentation<string>(BsonType.ObjectId);//.HasBsonRepresentation(BsonType.ObjectId);//.HasValueGenerator<ObjectIdGenerator>().HasBsonRepresentation(BsonType.ObjectId);
+            //builder.Property(x => x.Id)
+            //.HasConversion(
+            //        id => id.ToString(),
+            //        id => ObjectId.Parse(id))
+            //    .ValueGeneratedOnAdd();
         }
     }
 
-    public class ObjectIdGenerator : ValueGenerator<ObjectId>
-    {
-        public override ObjectId Next(EntityEntry entry)
-        {
-            if (entry == null)
-            {
-                throw new System.ArgumentNullException(nameof(entry));
-            }
+    //public class ObjectIdGenerator : ValueGenerator<ObjectId>
+    //{
+    //    public override ObjectId Next(EntityEntry entry)
+    //    {
+    //        if (entry == null)
+    //        {
+    //            throw new System.ArgumentNullException(nameof(entry));
+    //        }
 
-            return ObjectId.GenerateNewId();
-        }
-        public override bool GeneratesTemporaryValues => false;
-    }
+    //        return ObjectId.GenerateNewId();
+    //    }
+    //    public override bool GeneratesTemporaryValues => false;
+    //}
 }
