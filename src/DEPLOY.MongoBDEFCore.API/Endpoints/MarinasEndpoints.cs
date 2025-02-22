@@ -12,179 +12,187 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
     {
         public static void MapMarinasEndpoints(this IEndpointRouteBuilder app)
         {
-            var apiVersionSetAdocoes = app
+            var apiVersionSetMarinas = app
                 .NewApiVersionSet("marinas")
-                .HasApiVersion(new ApiVersion(1))
+                .HasApiVersion(new ApiVersion(1, 0))
                 .ReportApiVersions()
                 .Build();
 
-            var adocoes = app
+            var marinas = app
                 .MapGroup("/api/v{apiVersion:apiVersion}/marinas")
-                .RequireAuthorization()
-                .WithApiVersionSet(apiVersionSetAdocoes);
+                //.RequireAuthorization()
+                .WithApiVersionSet(apiVersionSetMarinas);
 
 
-            app.MapPost("/marina", async (MongoDBContext context,
+            marinas
+                .MapPost("/", async (MongoDBContext context,
                 [FromBody] Marina marina) =>
-            {
-                if (string.IsNullOrWhiteSpace(marina.Name))
                 {
-                    return Results.UnprocessableEntity("Name is required");
-                }
+                    if (string.IsNullOrWhiteSpace(marina.Name))
+                    {
+                        return Results.UnprocessableEntity("Name is required");
+                    }
 
-                context.Marinas.Add(new Marina { Name = marina.Name });
-                await context.SaveChangesAsync();
+                    context.Marinas.Add(new Marina { Name = marina.Name });
+                    await context.SaveChangesAsync();
 
-                return TypedResults.Created($"/marina/id/{marina.Id}", marina);
-            })
-            .Produces(201)
-            .Produces(422)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-post",
-                Summary = "create a marina",
-                Description = "process to register a new marina",
-                Tags = new List<OpenApiTag> { new() { Name = "marina" } }
-            });
-
-            app.MapGet("/marina", GetMarina)
-            .Produces(201)
-            .Produces(422)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-get",
-                Summary = "get a marina",
-                Description = "process to get a marina",
-                Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
-            });
-
-            app.MapGet("/marina/all", async (MongoDBContext context) =>
-            {
-                var items = await context.Marinas.ToListAsync();
-
-                if (items.Count == 0)
+                    return TypedResults.Created($"/searchbyid/{marina.Id}", marina);
+                })
+                .Produces(201)
+                .Produces(422)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
                 {
-                    return Results.NotFound();
-                }
+                    OperationId = "marina-post",
+                    Summary = "create a marina",
+                    Description = "process to register a new marina",
+                    Tags = new List<OpenApiTag> { new() { Name = "marina" } }
+                });
 
-                return TypedResults.Ok(items);
-            })
-            .Produces(200)
-            .Produces(404)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-all-get",
-                Summary = "get all marinas",
-                Description = "process to get all marinas",
-                Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
-            });
+            marinas
+                .MapGet("/", GetMarina)
+                .Produces(201)
+                .Produces(422)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
+                {
+                    OperationId = "marina-get",
+                    Summary = "get a marina",
+                    Description = "process to get a marina",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
+                });
 
-            app.MapGet("/marina/{marinaName}", async (MongoDBContext context,
+            marinas.MapGet("/all",
+                async (MongoDBContext context) =>
+                {
+                    var items = await context.Marinas.ToListAsync();
+
+                    if (items.Count == 0)
+                    {
+                        return Results.NotFound();
+                    }
+
+                    return TypedResults.Ok(items);
+                })
+                .Produces(200)
+                .Produces(404)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
+                {
+                    OperationId = "marina-all-get",
+                    Summary = "get all marinas",
+                    Description = "process to get all marinas",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marina" } }
+                });
+
+            marinas.MapGet("/{marinaName}",
+                async (MongoDBContext context,
                 [FromRoute] string marinaName,
                 CancellationToken cancellationToken = default) =>
-            {
-                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName, cancellationToken);
-
-                if (marina == null)
                 {
-                    return Results.NotFound();
-                }
+                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName, cancellationToken);
 
-                return TypedResults.Ok(marina);
-            })
-            .Produces(200)
-            .Produces(404)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-by-name-get",
-                Summary = "get marina by name",
-                Description = "process to get marinas by name",
-                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
-            });
+                    if (marina == null)
+                    {
+                        return Results.NotFound();
+                    }
 
-            app.MapGet("/marinabyid/{id}", async
-                (MongoDBContext context,
+                    return TypedResults.Ok(marina);
+                })
+                .Produces(200)
+                .Produces(404)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
+                {
+                    OperationId = "marina-by-name-get",
+                    Summary = "get marina by name",
+                    Description = "process to get marinas by name",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
+                });
+
+            marinas
+                .MapGet("/searchbyid/{id}",
+                async (MongoDBContext context,
                 [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
-            {
-                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
-
-                if (marina == null)
                 {
-                    return Results.NotFound();
-                }
+                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
-                return TypedResults.Ok(marina);
-            })
-            .Produces(200)
-            .Produces(404)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-by-id-get",
-                Summary = "get marina by id",
-                Description = "process to get marinas by id",
-                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
-            });
+                    if (marina == null)
+                    {
+                        return Results.NotFound();
+                    }
 
-            app.MapDelete("/marina/{id}", async (MongoDBContext context,
-               [FromRoute] string id,
-               CancellationToken cancellationToken = default) =>
-            {
-                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
-
-                if (marina == null)
+                    return TypedResults.Ok(marina);
+                })
+                .Produces(200)
+                .Produces(404)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
                 {
-                    return Results.NotFound();
-                }
+                    OperationId = "marina-by-id-get",
+                    Summary = "get marina by id",
+                    Description = "process to get marinas by id",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
+                });
 
-                context.Marinas.Remove(marina);
-                await context.SaveChangesAsync();
+            marinas
+                .MapDelete("/{id}",
+                async (MongoDBContext context,
+                [FromRoute] string id,
+                CancellationToken cancellationToken = default) =>
+                {
+                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
-                return TypedResults.Ok();
-            })
-            .Produces(200)
-            .Produces(404)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "marina-by-name-get",
-                Summary = "get marina by name",
-                Description = "process to get marinas by name",
-                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
-            });
+                    if (marina == null)
+                    {
+                        return Results.NotFound();
+                    }
 
-            app.MapPut("/marina/{id}", async (MongoDBContext context,
+                    context.Marinas.Remove(marina);
+                    await context.SaveChangesAsync();
+
+                    return TypedResults.Ok();
+                })
+                .Produces(200)
+                .Produces(404)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
+                {
+                    OperationId = "marina-by-name-get",
+                    Summary = "get marina by name",
+                    Description = "process to get marinas by name",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
+                });
+
+            marinas.MapPut("/{id}",
+                async (MongoDBContext context,
                 [FromRoute] string id,
                 [FromBody] Marina marina,
                 CancellationToken cancellationToken = default) =>
-            {
-                var marinaActual = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
-
-                if (marina == null)
                 {
-                    return Results.NotFound();
-                }
+                    var marinaActual = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
-                marinaActual!.Name = marina.Name;
+                    if (marina == null)
+                    {
+                        return Results.NotFound();
+                    }
 
-                await context.SaveChangesAsync();
-                return TypedResults.NoContent();
-            })
-            .Produces(204)
-            .Produces(404)
-            .Produces(500)
-            .WithOpenApi(operation => new(operation)
-            {
-                OperationId = "put-marina",
-                Summary = "update marina",
-                Description = "process to get marinas by name",
-                Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
-            });
+                    marinaActual!.Name = marina.Name;
+
+                    await context.SaveChangesAsync();
+                    return TypedResults.NoContent();
+                })
+                .Produces(204)
+                .Produces(404)
+                .Produces(500)
+                .WithOpenApi(operation => new(operation)
+                {
+                    OperationId = "put-marina",
+                    Summary = "update marina",
+                    Description = "process to get marinas by name",
+                    Tags = new List<OpenApiTag> { new() { Name = "Marinas" } }
+                });
 
             async Task<IResult> GetMarina(MongoDBContext context,
                 string marinaName)

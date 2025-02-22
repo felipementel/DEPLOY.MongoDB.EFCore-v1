@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using DEPLOY.MongoBDEFCore.API.Configs;
 using DEPLOY.MongoBDEFCore.API.Endpoints;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence;
@@ -13,9 +14,32 @@ builder.Services.Configure<JsonOptions>(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
+builder.Services.AddRouting(opt =>
+{
+    opt.LowercaseUrls = true;
+    opt.LowercaseQueryStrings = true;
+});
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddApiExplorer(
+    options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+
+        options.SubstituteApiVersionInUrl = true;
+    })
+.EnableApiVersionBinding();
+
+builder.Services.AddEndpointsApiExplorer();
+
 var itemConfig = builder.Services
-    .AddOptions<BoatDatabaseSettings>()
-    .BindConfiguration("BoatDatabase")
+    .AddOptions<DatabaseSettings>()
+    .BindConfiguration("Database")
     .ValidateDataAnnotations()
     .ValidateOnStart()
     .Validate(config =>
@@ -35,8 +59,8 @@ builder.Services.AddEntityFrameworkMongoDB()
     .AddDbContext<MongoDBContext>(options =>
     {
         options.UseMongoDB(
-            builder.Configuration.GetSection("BoatDatabase:ConnectionString").Value!,
-            builder.Configuration.GetSection("BoatDatabase:DatabaseName").Value!);
+            builder.Configuration.GetSection("Database:ConnectionString").Value!,
+            builder.Configuration.GetSection("Database:DatabaseName").Value!);
         options.LogTo(Console.WriteLine);
         options.EnableSensitiveDataLogging();
     });
