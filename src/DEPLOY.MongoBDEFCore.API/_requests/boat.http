@@ -1,6 +1,6 @@
-@LocalHost = http://localhost:7007
+# @HostAddress = http://localhost:7007
 
-POST {{LocalHost}}/api/v1/boats
+POST {{HostAddress}}/api/v1/boats
 Content-Type: application/json
 {
     "Name": "ALARRIBA II",
@@ -10,19 +10,22 @@ Content-Type: application/json
 
 ###
 
-GET {{LocalHost}}/all
+GET {{HostAddress}}/api/v1/boats/all
 
 ###
 
-GET {{LocalHost}}/searchbyid/ea519a38-58c4-40a2-ad17-8a7177378964
+GET {{HostAddress}}/api/v1/boats/searchbyid/67b869ff71653506ba2fc4fd
+
+###
+GET {{HostAddress}}/api/v1/boats/ALARRIBA%20II
 
 ###
 
-DELETE {{LocalHost}}/ea519a38-58c4-40a2-ad17-8a7177378964
+DELETE {{LocalHost}}/api/v1/boats/67b869dd71653506ba2fc4fc
 
 ###
 
-PUT {{LocalHost}}/ea519a38-58c4-40a2-ad17-8a7177378964
+PUT {{HostAddress}}/api/v1/boats/ea519a38-58c4-40a2-ad17-8a7177378964
 Content-Type: application/json
 {
     "Name": "Meu Iate",

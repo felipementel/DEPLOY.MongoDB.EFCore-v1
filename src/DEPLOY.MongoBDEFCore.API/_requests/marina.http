@@ -1,6 +1,6 @@
-@LocalHost = http://localhost:7007
+# @HostAddress = http://localhost:7007
 
-POST {{LocalHost}}/api/v1/marinas
+POST {{HostAddress}}/api/v1/marinas
 Content-Type: application/json
 {
     "Name": "Marina Original"
@@ -8,19 +8,22 @@ Content-Type: application/json
 
 ###
 
-GET {{LocalHost}}/all
+GET {{HostAddress}}/api/v1/marinas/all
 
 ###
 
-GET {{LocalHost}}/searchbyid/d7392ba2-affa-4a11-96a7-7f539dc6fa65
+GET {{HostAddress}}/api/v1/marinas/searchbyid/67b9cbe6e3555d8da33626c3
+
+###
+GET {{HostAddress}}/api/v1/marinas/Marina%20Original
 
 ###
 
-DELETE {{LocalHost}}/d7392ba2-affa-4a11-96a7-7f539dc6fa65
+DELETE {{HostAddress}}/api/v1/marinas/67b9cbe6e3555d8da33626c3
 
 ###
 
-PUT {{LocalHost}}/a95f06ca-55f6-44ef-a9bc-8880931ef942
+PUT {{HostAddress}}/api/v1/marinas/a95f06ca-55f6-44ef-a9bc-8880931ef942
 Content-Type: application/json
 {
     "Name": "Marina Novo Barco"

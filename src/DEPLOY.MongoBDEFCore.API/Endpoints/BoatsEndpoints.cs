@@ -75,7 +75,7 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 });
 
             boats
-                .MapGet("/boat/all", async (MongoDBContext context) =>
+                .MapGet("/all", async (MongoDBContext context) =>
                 {
                     var items = await context.Boats.ToListAsync();
 
@@ -97,14 +97,16 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string boatName,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var boat = await context.Boats.FirstOrDefaultAsync(x => x.Name == boatName, cancellationToken);
+                    var matchingBoats = await context.Boats
+                    .Where(x => x.Name.ToUpper().Contains(boatName.ToUpper()))
+                    .ToListAsync(cancellationToken);
 
-                    if (boat == null)
+                    if (matchingBoats.Count == 0)
                     {
                         return Results.NotFound();
                     }
 
-                    return TypedResults.Ok(boat);
+                    return TypedResults.Ok(matchingBoats);
                 })
                 .Produces(200)
                 .Produces(422)
@@ -123,7 +125,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var boat = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    var boat = await context.Boats
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                     if (boat == null)
                     {
@@ -148,7 +151,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var boat = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    var boat = await context.Boats
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                     if (boat == null)
                     {
@@ -158,7 +162,7 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                     context.Boats.Remove(boat);
                     await context.SaveChangesAsync();
 
-                    return TypedResults.Ok();
+                    return TypedResults.NoContent();
                 })
                 .Produces(200)
                 .Produces(404)
@@ -177,7 +181,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromBody] Boat boat,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var boatActual = await context.Boats.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    var boatActual = await context.Boats
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
                     if (boat == null)
                     {
@@ -189,6 +194,7 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                     boatActual.License = boat.License;
 
                     await context.SaveChangesAsync();
+
                     return TypedResults.NoContent();
                 })
                 .Produces(204)
@@ -212,7 +218,7 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                     return TypedResults.NotFound();
                 }
 
-                return TypedResults.Ok();
+                return TypedResults.Ok(boat);
             }
         }
     }

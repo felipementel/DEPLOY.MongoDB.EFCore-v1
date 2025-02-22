@@ -90,14 +90,16 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string marinaName,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName, cancellationToken);
+                    var matchingBoats = await context.Marinas
+                    .Where(x => x.Name.ToUpper().Contains(marinaName.ToUpper()))
+                    .ToListAsync(cancellationToken);
 
-                    if (marina == null)
+                    if (matchingBoats.Count == 0)
                     {
                         return Results.NotFound();
                     }
 
-                    return TypedResults.Ok(marina);
+                    return TypedResults.Ok(matchingBoats);
                 })
                 .Produces(200)
                 .Produces(404)
@@ -116,7 +118,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
+                    var marina = await context.Marinas
+                    .FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
                     if (marina == null)
                     {
@@ -142,7 +145,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromRoute] string id,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
+                    var marina = await context.Marinas
+                    .FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
                     if (marina == null)
                     {
@@ -171,7 +175,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 [FromBody] Marina marina,
                 CancellationToken cancellationToken = default) =>
                 {
-                    var marinaActual = await context.Marinas.FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
+                    var marinaActual = await context.Marinas
+                    .FirstOrDefaultAsync(x => x.Id == ObjectId.Parse(id), cancellationToken);
 
                     if (marina == null)
                     {
@@ -197,7 +202,8 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
             async Task<IResult> GetMarina(MongoDBContext context,
                 string marinaName)
             {
-                var marina = await context.Marinas.FirstOrDefaultAsync(x => x.Name == marinaName);
+                var marina = await context.Marinas
+                    .FirstOrDefaultAsync(x => x.Name == marinaName);
 
                 if (marina == null)
                 {
