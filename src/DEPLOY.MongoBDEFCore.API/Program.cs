@@ -1,12 +1,19 @@
 using Asp.Versioning;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DEPLOY.MongoBDEFCore.API.Configs;
 using DEPLOY.MongoBDEFCore.API.Endpoints;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+const string serviceName = "canalDEPLOY";
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -64,6 +71,54 @@ builder.Services.AddEntityFrameworkMongoDB()
         options.LogTo(Console.WriteLine);
         options.EnableSensitiveDataLogging();
     });
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddOpenTelemetry()
+          .ConfigureResource(resource => resource.AddService(serviceName))
+          .WithTracing(tracing => tracing
+              .AddAspNetCoreInstrumentation()
+              .AddConsoleExporter()
+              .AddOtlpExporter())
+          .WithMetrics(metrics => metrics
+              .AddAspNetCoreInstrumentation()
+              .AddOtlpExporter()
+              .AddConsoleExporter());
+
+    builder.Logging.AddOpenTelemetry(options =>
+    {
+        options
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService(serviceName))
+            .AddOtlpExporter()
+            .AddConsoleExporter();
+    });
+}
+else
+{
+    builder.Services.AddOpenTelemetry()
+        .UseAzureMonitor(configureAzureMonitor =>
+        {
+            configureAzureMonitor.ConnectionString = builder.Configuration.GetSection("ApplicationInsights:InstrumentationKey").Value!;
+            configureAzureMonitor.EnableLiveMetrics = true;
+        })
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddOtlpExporter())
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddOtlpExporter());
+
+    builder.Logging.AddOpenTelemetry(options =>
+    {
+        options
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService(serviceName))
+            .AddOtlpExporter();
+    });
+}
 
 var app = builder.Build();
 

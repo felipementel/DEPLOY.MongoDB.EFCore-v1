@@ -1,0 +1,84 @@
+# docker compose -f docker/infra-docker.yml --env-file ./docker/mongodb.env up
+# docker compose -f docker/infra-docker.yml --env-file ./docker/mongodb.env down --volumes --remove-orphans
+# docker stats --no-stream
+
+# docker system prune -a -f && docker volume prune -f && docker network prune -f && docker container prune -f
+
+# https://devblogs.microsoft.com/dotnet/mongodb-ef-core-provider-whats-new/
+# https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mongo-app?view=aspnetcore-9.0&tabs=visual-studio
+
+services:
+  mongodb-service:
+    image: mongo:8.0.4
+    container_name: mongodb-container
+    restart: always
+    ports:
+      - 27018:27017
+    volumes:
+      - /home/felipementel/docker/volumes/mongodb-efcore:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${ADMIN_MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${ADMIN_MONGODB_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    networks:
+      - canal-deploy-network
+
+  mongo-express-service:
+    image: mongo-express:1.0.2-20
+    container_name: mongoexpress-container
+    restart: always
+    ports:
+      - 8077:8081
+    depends_on:
+      - mongodb-service
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ADMIN_MONGODB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ADMIN_MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb-container
+      ME_CONFIG_BASICAUTH_USERNAME: ${BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${BASICAUTH_PASSWORD}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
+      ME_CONFIG_OPTIONS_EDITORTHEME: "dracula"
+      ME_CONFIG_SITE_BASEURL: '/'
+      ME_CONFIG_HEALTH_CHECK_PATH: '/status'
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_URL: mongodb://${ADMIN_MONGODB_USER}:${ADMIN_MONGODB_PASSWORD}@mongodb-container:27017/?authSource=admin&ssl=false
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    networks:
+      - canal-deploy-network
+
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector
+    container_name: opentelemetry-collector-container
+    restart: always
+    ports:
+      - 4317:4317 # Porta gRPC
+      - 4318:4318 # Porta HTTP
+    volumes:
+      - ./collector-config.yaml:/etc/otel-collector-config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  canal-deploy-network:
+    driver: bridge
