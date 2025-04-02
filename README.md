@@ -12,5 +12,5 @@ https://devblogs.microsoft.com/dotnet/mongodb-ef-core-provider-whats-new/
 
 Execute o comando no diretório raiz do projeto:
 ````
-dotnet run --project ./src/DEPLOY.MongoBDEFCore.API/DEPLOY.MongoBDEFCore.API.csproj  --profile https
+dotnet run --project ./src/DEPLOY.MongoBDEFCore.API/DEPLOY.MongoBDEFCore.API.csproj --profile https
 ````
