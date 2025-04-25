@@ -1,10 +1,8 @@
-﻿using MongoDB.Bson;
-
-namespace DEPLOY.MongoBDEFCore.API.Domain
+﻿namespace DEPLOY.MongoBDEFCore.API.Domain
 {
     public class Boat
     {
-        public string Id { get; set; } = new ObjectId().ToString();
+        public string Id { get; set; }
 
         public string Name { get; set; }
 

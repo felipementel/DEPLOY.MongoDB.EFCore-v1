@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MongoDB.EntityFrameworkCore.Extensions;
+using MongoDB.EntityFrameworkCore.ValueGeneration;
 
 namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
 {
@@ -17,7 +18,12 @@ namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
             builder
             .Property(x => x.Id)
             .HasConversion<MongoDB.Bson.ObjectId>()
-            .ValueGeneratedOnAdd();
+            .HasValueGenerator<StringObjectIdValueGenerator>();
+
+            //builder
+            //.Property(x => x.Id)
+            //.HasConversion<MongoDB.Bson.ObjectId>()
+            //.ValueGeneratedOnAdd();
 
             //.HasBsonRepresentation<string>(BsonType.ObjectId);
             //.HasValueGenerator<ObjectIdGenerator>()
