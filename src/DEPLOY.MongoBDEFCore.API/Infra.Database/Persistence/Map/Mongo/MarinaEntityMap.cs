@@ -15,9 +15,7 @@ public static class MarinaEntityMap
             map
             .MapIdProperty(i => i.Id)
             .SetElementName("_id");
-            //.SetIdGenerator(StringObjectIdGenerator.Instance)
-            //.SetSerializer(new StringSerializer(BsonType.ObjectId));
-
+            
             //map
             //.MapIdProperty(i => i.Id)
             //.SetElementName("_id")
