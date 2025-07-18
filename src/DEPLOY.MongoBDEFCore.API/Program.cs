@@ -109,18 +109,18 @@ builder.Services.AddOpenTelemetry()
                  options.Endpoint = new Uri("http://localhost:4318/v1/traces");
                  options.Protocol = OtlpExportProtocol.HttpProtobuf;
                  options.ExportProcessorType = ExportProcessorType.Simple;
-             }));
-//  .WithMetrics(metrics => metrics
-//      .AddAspNetCoreInstrumentation()
-//      .AddOtlpExporter(options =>
-//      {
-//          options.Endpoint = new Uri("http://localhost:4317");
-//          options.Protocol = OtlpExportProtocol.HttpProtobuf;
-//          options.ExportProcessorType = ExportProcessorType.Simple;
-//      })
-//      .AddHttpClientInstrumentation()
-//      .AddConsoleExporter()
-//      );
+             }))
+         .WithMetrics(metrics => metrics
+             .AddAspNetCoreInstrumentation()
+             .AddOtlpExporter(options =>
+             {
+                 options.Endpoint = new Uri("http://localhost:4318/v1/metrics");
+                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
+                 options.ExportProcessorType = ExportProcessorType.Simple;
+             })
+             .AddHttpClientInstrumentation()
+             .AddConsoleExporter()
+             );
 
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -130,7 +130,7 @@ builder.Logging.AddOpenTelemetry(options =>
                 .AddService(serviceName))
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://localhost:4318");
+            options.Endpoint = new Uri("http://localhost:4318/v1/logs");
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.ExportProcessorType = ExportProcessorType.Simple;
         });
