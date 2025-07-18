@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: 'PR Caller: Validate PR'
 run-name: "PR Check by ${{ github.actor }}"
 
@@ -33,3 +34,40 @@ jobs:
       openAPIFolder: "open-api"
     secrets:
       inherit
+=======
+name: 'PR Caller: Validate PR'
+run-name: "PR Check by ${{ github.actor }}"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+      - '**.md'
+      - 'docs/**'
+      - 'src/**/_requests/**'
+
+jobs:
+  call-pr-check-workflow:
+    name: Call PR Check Reusable Workflow
+    uses: felipementel/reusable-workflows/.github/workflows/pr-check.yml@main
+    permissions:
+      contents: read
+      security-events: write
+    with:
+      environment: "DEV"
+      testsFolder: "tests"
+      msgCanalDeploy: "PR Check - Canal DEPLOY ${{ github.sha }}"
+      dotnetVersion: ${{ vars.DOTNETVERSION || '9.x' }}
+      projectBaseDir: ${{ vars.PROJECTBASEDIR || './src' }}
+      solutionFileName: ${{ vars.SOLUTIONFILENAME }}
+      mainProject: ${{ vars.MAINPROJECT }}
+      reportTitle: ${{ vars.REPORTTITLE || 'PR Check Report' }}
+      sonarExclusions: ${{ vars.SONAREXCLUSIONS || '' }}
+      imageName: ${{ vars.IMAGENAME }}
+      openAPIFolder: "open-api"
+    secrets:
+      inherit
+>>>>>>> 07c4092 (feat: update libs including MongoDB.EntityFrameworkCore)

@@ -9,8 +9,8 @@ public static class BoatEntityMap
     {
         BsonClassMap.RegisterClassMap<Boat>(map =>
         {
-            //map
-            //.AutoMap();
+            map
+            .AutoMap();
 
             map
             .SetIgnoreExtraElements(true);
