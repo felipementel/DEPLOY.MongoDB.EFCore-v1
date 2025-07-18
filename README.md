@@ -52,5 +52,5 @@ docker compose -f docker/infra-docker.yml --env-file ./docker/mongodb.env down
 
 Execute o comando no diretório raiz do projeto:
 ````
-dotnet run --project ./src/DEPLOY.MongoBDEFCore.API/DEPLOY.MongoBDEFCore.API.csproj --profile https
+dotnet run --project ./src/DEPLOY.MongoBDEFCore.API --launch-profile "https"
 ````

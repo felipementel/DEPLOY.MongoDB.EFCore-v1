@@ -39,45 +39,37 @@ services:
     networks:
       - canal-deploy-network
 
-  opentelemetry-collector:
-    image: otel/opentelemetry-collector
-    container_name: opentelemetry-collector-container
-    restart: always
-    ports:
-      - 4317:4317 # Porta gRPC
-      - 4318:4318 # Porta HTTP
-    volumes:
-      - ./collector-config.yaml:/etc/otel-collector-config.yaml
-    depends_on:
-      - jaeger-service
-    logging:
-      driver: "none"
-    # logging:
-    #   driver: "json-file"
-    #   options:
-    #     max-size: "5m"
-    #     max-file: "2"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-    networks:
-      - canal-deploy-network
+  # opentelemetry-collector:
+  #   image: otel/opentelemetry-collector
+  #   container_name: opentelemetry-collector-container
+  #   restart: always
+  #   ports:
+  #     - 4317:4317 # Porta gRPC
+  #     - 4318:4318 # Porta HTTP
+  #   volumes:
+  #     - ./docker/collector-config.yaml:/etc/otel-collector-config.yaml
+  #   depends_on:
+  #     - jaeger-service
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 256M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 128M
+  #   networks:
+  #     - canal-deploy-network
 
   jaeger-service:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger-container
     restart: always
     ports:
-      - 16686:16686 # Jaeger UI
-      - 14250:14250 # gRPC port for receiving traces
-      - 14268:14268 # HTTP port for receiving traces
-      - 6831:6831/udp # UDP port for receiving traces (legacy)
-      - 6832:6832/udp # UDP port for receiving traces (legacy)
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+      - 9411:9411
     environment:
       COLLECTOR_OTLP_ENABLED: true
       COLLECTOR_ZIPKIN_HOST_PORT: :9411
