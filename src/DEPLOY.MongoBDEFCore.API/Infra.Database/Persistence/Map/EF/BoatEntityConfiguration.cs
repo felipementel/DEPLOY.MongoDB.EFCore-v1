@@ -19,14 +19,6 @@ namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
             .Property(x => x.Id)
             .HasConversion<MongoDB.Bson.ObjectId>()
             .HasValueGenerator<StringObjectIdValueGenerator>();
-
-            //builder
-            //.Property(x => x.Id)
-            //.HasConversion<MongoDB.Bson.ObjectId>()
-            //.ValueGeneratedOnAdd();
-
-            //.HasBsonRepresentation<string>(BsonType.ObjectId);
-            //.HasValueGenerator<ObjectIdGenerator>()
         }
     }
 }

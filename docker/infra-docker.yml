@@ -6,7 +6,6 @@
 
 # URLs de Acesso:
 # MongoDB: localhost:27018
-# Mongo Express: http://localhost:8077
 # Jaeger UI: http://localhost:16686
 # OpenTelemetry Collector gRPC: localhost:4317
 # OpenTelemetry Collector HTTP: localhost:4318
@@ -62,7 +61,7 @@ services:
   #     - canal-deploy-network
 
   jaeger-service:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.22.0
     container_name: jaeger-container
     restart: always
     ports:

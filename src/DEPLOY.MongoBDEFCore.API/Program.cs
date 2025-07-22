@@ -61,7 +61,8 @@ var itemConfig = builder.Services
 
 builder.Services.AddOpenApi();
 
-SetupMap.ConfigureMaps();
+//Apenas para mostrar como seria o mapeamento utilizando o MongoDB
+//SetupMap.ConfigureMaps();
 
 builder.Services.AddEntityFrameworkMongoDB()
     .AddDbContext<MongoDBContext>(options =>
@@ -73,13 +74,6 @@ builder.Services.AddEntityFrameworkMongoDB()
         options.EnableSensitiveDataLogging();
     });
 
-if (builder.Environment.IsDevelopment())
-{
-
-}
-else
-{
-}
 builder.Services.AddOpenTelemetry()
         .ConfigureResource(resource =>
         {
@@ -119,8 +113,7 @@ builder.Services.AddOpenTelemetry()
                  options.ExportProcessorType = ExportProcessorType.Simple;
              })
              .AddHttpClientInstrumentation()
-             .AddConsoleExporter()
-             );
+             .AddConsoleExporter());
 
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -134,8 +127,6 @@ builder.Logging.AddOpenTelemetry(options =>
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.ExportProcessorType = ExportProcessorType.Simple;
         });
-
-    //.AddConsoleExporter();
 });
 
 var app = builder.Build();
