@@ -10,6 +10,11 @@ namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF
         public void Configure(EntityTypeBuilder<Marina> builder)
         {
             builder.ToCollection("Marina");
+
+            builder.Property(x => x.Name)
+                .HasElementName("name_name")
+                .IsRequired()
+                .HasMaxLength(100);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using DEPLOY.MongoBDEFCore.API.Domain;
-using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence;
+using DEPLOY.MongoBDEFCore.API.Infra.Database.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -19,7 +19,6 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
 
             var boats = app
                 .MapGroup("/api/v{version:apiVersion}/boats")
-                //.RequireAuthorization()
                 .WithApiVersionSet(apiVersionSetBoats);
 
 
@@ -78,6 +77,11 @@ namespace DEPLOY.MongoBDEFCore.API.Endpoints
                 .MapGet("/all", async (MongoDBContext context) =>
                 {
                     var items = await context.Boats.ToListAsync();
+
+                    if (items.Count == 0)
+                    {
+                        return Results.NotFound();
+                    }
 
                     return TypedResults.Ok(items);
                 })

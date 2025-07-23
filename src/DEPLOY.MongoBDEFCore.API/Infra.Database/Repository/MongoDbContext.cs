@@ -2,7 +2,7 @@
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence.Map.EF;
 using Microsoft.EntityFrameworkCore;
 
-namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Persistence
+namespace DEPLOY.MongoBDEFCore.API.Infra.Database.Repository
 {
     public class MongoDBContext : DbContext
     {

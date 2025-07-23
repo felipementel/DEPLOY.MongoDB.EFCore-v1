@@ -4,23 +4,29 @@
 
 # docker system prune -a -f && docker volume prune -f && docker network prune -f && docker container prune -f
 
+# URLs de Acesso:
+# MongoDB: localhost:27018
+# Jaeger UI: http://localhost:16686
+# OpenTelemetry Collector gRPC: localhost:4317
+# OpenTelemetry Collector HTTP: localhost:4318
+
 # https://devblogs.microsoft.com/dotnet/mongodb-ef-core-provider-whats-new/
 # https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mongo-app?view=aspnetcore-9.0&tabs=visual-studio
-
+# https://www.jaegertracing.io/docs/latest/getting-started/
 # https://hub.docker.com/r/mongodb/mongodb-atlas-local
 
 services:
   mongodb-service:
-    image: mongo:8.0.4
+    image: mongodb/mongodb-community-server:7.0.21-ubi8
     container_name: mongodb-container
     restart: always
     ports:
       - 27018:27017
     volumes:
-      - /home/felipementel/docker/volumes/mongodb-efcore:/data/db
+      - mongodb-data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${ADMIN_MONGODB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${ADMIN_MONGODB_PASSWORD}
+      MONGODB_INITDB_ROOT_USERNAME: ${ADMIN_MONGODB_USER}
+      MONGODB_INITDB_ROOT_PASSWORD: ${ADMIN_MONGODB_PASSWORD}
     deploy:
       resources:
         limits:
@@ -32,55 +38,55 @@ services:
     networks:
       - canal-deploy-network
 
-  mongo-express-service:
-    image: mongo-express:1.0.2-20
-    container_name: mongoexpress-container
+  # opentelemetry-collector:
+  #   image: otel/opentelemetry-collector
+  #   container_name: opentelemetry-collector-container
+  #   restart: always
+  #   ports:
+  #     - 4317:4317 # Porta gRPC
+  #     - 4318:4318 # Porta HTTP
+  #   volumes:
+  #     - ./docker/collector-config.yaml:/etc/otel-collector-config.yaml
+  #   depends_on:
+  #     - jaeger-service
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 256M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 128M
+  #   networks:
+  #     - canal-deploy-network
+
+  jaeger-service:
+    image: jaegertracing/all-in-one:1.22.0
+    container_name: jaeger-container
     restart: always
     ports:
-      - 8077:8081
-    depends_on:
-      - mongodb-service
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+      - 9411:9411
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ADMIN_MONGODB_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ADMIN_MONGODB_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb-container
-      ME_CONFIG_BASICAUTH_USERNAME: ${BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${BASICAUTH_PASSWORD}
-      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
-      ME_CONFIG_OPTIONS_EDITORTHEME: "dracula"
-      ME_CONFIG_SITE_BASEURL: '/'
-      ME_CONFIG_HEALTH_CHECK_PATH: '/status'
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_URL: mongodb://${ADMIN_MONGODB_USER}:${ADMIN_MONGODB_PASSWORD}@mongodb-container:27017/?authSource=admin&ssl=false
+      COLLECTOR_OTLP_ENABLED: true
+      COLLECTOR_ZIPKIN_HOST_PORT: :9411
     deploy:
       resources:
         limits:
           cpus: '0.50'
-          memory: 256M
+          memory: 512M
         reservations:
           cpus: '0.25'
-          memory: 128M
+          memory: 256M
     networks:
       - canal-deploy-network
-
-  opentelemetry-collector:
-    image: otel/opentelemetry-collector
-    container_name: opentelemetry-collector-container
-    restart: always
-    ports:
-      - 4317:4317 # Porta gRPC
-      - 4318:4318 # Porta HTTP
-    volumes:
-      - ./collector-config.yaml:/etc/otel-collector-config.yaml
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
 
 networks:
   canal-deploy-network:
     driver: bridge
+
+volumes:
+  mongodb-data:
+    driver: local
