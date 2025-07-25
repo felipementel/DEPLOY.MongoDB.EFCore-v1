@@ -199,6 +199,31 @@ docker logs opentelemetry-collector-container --tail 50
 docker logs jaeger-container --tail 50
 ```
 
+````
+curl -X POST http://localhost:4318/v1/traces \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": {
+        "attributes": [{
+          "key": "service.name",
+          "value": {"stringValue": "test-service"}
+        }]
+      },
+      "scopeSpans": [{
+        "spans": [{
+          "traceId": "12345678901234567890123456789012",
+          "spanId": "1234567890123456",
+          "name": "test-span",
+          "kind": 1,
+          "startTimeUnixNano": "1640995200000000000",
+          "endTimeUnixNano": "1640995201000000000"
+        }]
+      }]
+    }]
+  }'
+````
+
 ## 📖 Referências
 
 - [MongoDB EF Core Provider](https://devblogs.microsoft.com/dotnet/mongodb-ef-core-provider-whats-new/)

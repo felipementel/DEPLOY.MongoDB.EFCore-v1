@@ -4,8 +4,8 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<UserSecretsId>DEPLOY.MongoBDEFCore.API</UserSecretsId>
-		<Version>1.1.0</Version>
+		<UserSecretsId>_DEPLOY.MongoBDEFCore.API</UserSecretsId>
+		<Version>1.2.0</Version>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<!-- <OpenApiDocumentsDirectory>open-api</OpenApiDocumentsDirectory> -->
 	</PropertyGroup>

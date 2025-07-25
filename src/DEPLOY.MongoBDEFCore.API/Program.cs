@@ -86,32 +86,36 @@ builder.Services.AddOpenTelemetry()
                 { "service.instance.id", Environment.MachineName }
             });
         })
-         // .UseAzureMonitor(configureAzureMonitor =>
-         // {
-         //     var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
-         //     if (!string.IsNullOrEmpty(connectionString))
-         //     {
-         //         configureAzureMonitor.ConnectionString = connectionString;
-         //         configureAzureMonitor.EnableLiveMetrics = true;
-         //     }
-         // })
+        //  .UseAzureMonitor(configureAzureMonitor =>
+        //  {
+        //      var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
+        //      if (!string.IsNullOrEmpty(connectionString))
+        //      {
+        //          configureAzureMonitor.ConnectionString = connectionString;
+        //          configureAzureMonitor.EnableLiveMetrics = true;
+        //      }
+        //  })
          .WithTracing(tracing => tracing
              .AddAspNetCoreInstrumentation()
              .AddHttpClientInstrumentation()
              .AddConsoleExporter()
              .AddOtlpExporter(options =>
              {
-                 options.Endpoint = new Uri("http://localhost:4318/v1/traces");
+                 var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+                 options.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
                  options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Batch;
+                 options.ExportProcessorType = ExportProcessorType.Simple;
+                 Console.WriteLine($"OpenTelemetry Traces Endpoint: {options.Endpoint}");
              }))
          .WithMetrics(metrics => metrics
              .AddAspNetCoreInstrumentation()
              .AddOtlpExporter(options =>
              {
-                 options.Endpoint = new Uri("http://localhost:4318/v1/metrics");
+                 var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+                 options.Endpoint = new Uri($"{otlpEndpoint}/v1/metrics");
                  options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Batch;
+                 options.ExportProcessorType = ExportProcessorType.Simple;
+                 Console.WriteLine($"OpenTelemetry Metrics Endpoint: {options.Endpoint}");
              })
              .AddHttpClientInstrumentation()
              .AddConsoleExporter());
@@ -124,9 +128,11 @@ builder.Logging.AddOpenTelemetry(options =>
                 .AddService(serviceName))
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://localhost:4318/v1/logs");
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/logs");
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Logs Endpoint: {options.Endpoint}");
         });
 });
 
