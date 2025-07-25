@@ -62,7 +62,7 @@ services:
       - canal-deploy-network
 
   jaeger-service:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/all-in-one:1.52.0
     container_name: jaeger-container
     restart: always
     ports:
