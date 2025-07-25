@@ -46,7 +46,7 @@ services:
       - 4317:4317 # Porta gRPC
       - 4318:4318 # Porta HTTP
     volumes:
-      - /mnt/c/proj/deploy/_mantidos/DEPLOY.MongoDB.EFCore-v1/docker/collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./collector-config.yaml:/etc/otel-collector-config.yaml
     command: ["--config=/etc/otel-collector-config.yaml"]
     depends_on:
       - jaeger-service
