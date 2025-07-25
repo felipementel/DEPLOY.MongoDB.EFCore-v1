@@ -14,6 +14,7 @@ using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 const string serviceName = "canalDEPLOY.MongoBD.EFCore.API";
 
 builder.Services.Configure<JsonOptions>(options =>
