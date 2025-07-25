@@ -85,15 +85,15 @@ builder.Services.AddOpenTelemetry()
                 { "service.instance.id", Environment.MachineName }
             });
         })
-        .UseAzureMonitor(configureAzureMonitor =>
-        {
-            var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                configureAzureMonitor.ConnectionString = connectionString;
-                configureAzureMonitor.EnableLiveMetrics = true;
-            }
-        })
+         // .UseAzureMonitor(configureAzureMonitor =>
+         // {
+         //     var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
+         //     if (!string.IsNullOrEmpty(connectionString))
+         //     {
+         //         configureAzureMonitor.ConnectionString = connectionString;
+         //         configureAzureMonitor.EnableLiveMetrics = true;
+         //     }
+         // })
          .WithTracing(tracing => tracing
              .AddAspNetCoreInstrumentation()
              .AddHttpClientInstrumentation()
@@ -102,7 +102,7 @@ builder.Services.AddOpenTelemetry()
              {
                  options.Endpoint = new Uri("http://localhost:4318/v1/traces");
                  options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Simple;
+                 options.ExportProcessorType = ExportProcessorType.Batch;
              }))
          .WithMetrics(metrics => metrics
              .AddAspNetCoreInstrumentation()
@@ -110,7 +110,7 @@ builder.Services.AddOpenTelemetry()
              {
                  options.Endpoint = new Uri("http://localhost:4318/v1/metrics");
                  options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Simple;
+                 options.ExportProcessorType = ExportProcessorType.Batch;
              })
              .AddHttpClientInstrumentation()
              .AddConsoleExporter());
