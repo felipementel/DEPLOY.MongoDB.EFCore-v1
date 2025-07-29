@@ -1,8 +1,10 @@
 using Asp.Versioning;
+using Azure.Core.Pipeline;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DEPLOY.MongoBDEFCore.API.Configs;
 using DEPLOY.MongoBDEFCore.API.Endpoints;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Repository;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry;
@@ -86,39 +88,39 @@ builder.Services.AddOpenTelemetry()
                 { "service.instance.id", Environment.MachineName }
             });
         })
-        //  .UseAzureMonitor(configureAzureMonitor =>
-        //  {
-        //      var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
-        //      if (!string.IsNullOrEmpty(connectionString))
-        //      {
-        //          configureAzureMonitor.ConnectionString = connectionString;
-        //          configureAzureMonitor.EnableLiveMetrics = true;
-        //      }
-        //  })
-         .WithTracing(tracing => tracing
-             .AddAspNetCoreInstrumentation()
-             .AddHttpClientInstrumentation()
-             .AddConsoleExporter()
-             .AddOtlpExporter(options =>
-             {
-                 var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
-                 options.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
-                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Simple;
-                 Console.WriteLine($"OpenTelemetry Traces Endpoint: {options.Endpoint}");
-             }))
-         .WithMetrics(metrics => metrics
-             .AddAspNetCoreInstrumentation()
-             .AddOtlpExporter(options =>
-             {
-                 var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
-                 options.Endpoint = new Uri($"{otlpEndpoint}/v1/metrics");
-                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Simple;
-                 Console.WriteLine($"OpenTelemetry Metrics Endpoint: {options.Endpoint}");
-             })
-             .AddHttpClientInstrumentation()
-             .AddConsoleExporter());
+        .UseAzureMonitor(configureAzureMonitor =>
+        {
+            var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                configureAzureMonitor.ConnectionString = connectionString;
+                configureAzureMonitor.EnableLiveMetrics = true;
+            }
+        })
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
+        .AddOtlpExporter(options =>
+        {
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Traces Endpoint: {options.Endpoint}");
+        }))
+            .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+        .AddOtlpExporter(options =>
+        {
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/metrics");
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Metrics Endpoint: {options.Endpoint}");
+        })
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter());
 
 builder.Logging.AddOpenTelemetry(options =>
 {
