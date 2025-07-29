@@ -1,8 +1,10 @@
 using Asp.Versioning;
+using Azure.Core.Pipeline;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DEPLOY.MongoBDEFCore.API.Configs;
 using DEPLOY.MongoBDEFCore.API.Endpoints;
 using DEPLOY.MongoBDEFCore.API.Infra.Database.Repository;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry;
@@ -14,6 +16,7 @@ using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 const string serviceName = "canalDEPLOY.MongoBD.EFCore.API";
 
 builder.Services.Configure<JsonOptions>(options =>
@@ -74,6 +77,7 @@ builder.Services.AddEntityFrameworkMongoDB()
         options.EnableSensitiveDataLogging();
     });
 
+// OpenTelemetry Configurations
 builder.Services.AddOpenTelemetry()
         .ConfigureResource(resource =>
         {
@@ -85,35 +89,44 @@ builder.Services.AddOpenTelemetry()
                 { "service.instance.id", Environment.MachineName }
             });
         })
-         // .UseAzureMonitor(configureAzureMonitor =>
-         // {
-         //     var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
-         //     if (!string.IsNullOrEmpty(connectionString))
-         //     {
-         //         configureAzureMonitor.ConnectionString = connectionString;
-         //         configureAzureMonitor.EnableLiveMetrics = true;
-         //     }
-         // })
-         .WithTracing(tracing => tracing
-             .AddAspNetCoreInstrumentation()
-             .AddHttpClientInstrumentation()
-             .AddConsoleExporter()
-             .AddOtlpExporter(options =>
-             {
-                 options.Endpoint = new Uri("http://localhost:4318/v1/traces");
-                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Batch;
-             }))
-         .WithMetrics(metrics => metrics
-             .AddAspNetCoreInstrumentation()
-             .AddOtlpExporter(options =>
-             {
-                 options.Endpoint = new Uri("http://localhost:4318/v1/metrics");
-                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                 options.ExportProcessorType = ExportProcessorType.Batch;
-             })
-             .AddHttpClientInstrumentation()
-             .AddConsoleExporter());
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
+        .AddOtlpExporter(options =>
+        {
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/traces");
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Traces Endpoint: {options.Endpoint}");
+        }))
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
+        .AddOtlpExporter(options =>
+        {
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/metrics");
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Metrics Endpoint: {options.Endpoint}");
+        }))
+        .UseAzureMonitor(configureAzureMonitor =>
+        {
+            var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                configureAzureMonitor.ConnectionString = connectionString;
+                configureAzureMonitor.EnableLiveMetrics = true;
+                Console.WriteLine("Azure Monitor configurado para Application Insights");
+            }
+            else
+            {
+                Console.WriteLine("Application Insights não configurado - ConnectionString vazia");
+            }
+        });
 
 builder.Logging.AddOpenTelemetry(options =>
 {
@@ -123,9 +136,11 @@ builder.Logging.AddOpenTelemetry(options =>
                 .AddService(serviceName))
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://localhost:4318/v1/logs");
+            var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
+            options.Endpoint = new Uri($"{otlpEndpoint}/v1/logs");
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.ExportProcessorType = ExportProcessorType.Simple;
+            Console.WriteLine($"OpenTelemetry Logs Endpoint: {options.Endpoint}");
         });
 });
 

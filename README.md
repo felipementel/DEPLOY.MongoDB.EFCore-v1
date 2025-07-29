@@ -43,6 +43,10 @@ Projeto criado para testar a conexão com o MongoDB utilizando o Entity Framewor
 └──────────────────┘                                                         └─────────────────┘
 ```
 
+### Como funciona dentro do Open Telemetry
+
+![otel](./docs/OTel.png)
+
 ### Componentes
 - **API**: Aplicação .NET com endpoints para gerenciar Boats e Marinas
 - **MongoDB**: Banco de dados para persistência
@@ -198,6 +202,31 @@ docker logs opentelemetry-collector-container --tail 50
 # Logs do Jaeger
 docker logs jaeger-container --tail 50
 ```
+
+````
+curl -X POST http://localhost:4318/v1/traces \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": {
+        "attributes": [{
+          "key": "service.name",
+          "value": {"stringValue": "test-service"}
+        }]
+      },
+      "scopeSpans": [{
+        "spans": [{
+          "traceId": "12345678901234567890123456789012",
+          "spanId": "1234567890123456",
+          "name": "test-span",
+          "kind": 1,
+          "startTimeUnixNano": "1640995200000000000",
+          "endTimeUnixNano": "1640995201000000000"
+        }]
+      }]
+    }]
+  }'
+````
 
 ## 📖 Referências
 
