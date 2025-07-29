@@ -77,6 +77,7 @@ builder.Services.AddEntityFrameworkMongoDB()
         options.EnableSensitiveDataLogging();
     });
 
+// OpenTelemetry Configurations
 builder.Services.AddOpenTelemetry()
         .ConfigureResource(resource =>
         {
@@ -87,15 +88,6 @@ builder.Services.AddOpenTelemetry()
                 { "service.version", "1.0.0" },
                 { "service.instance.id", Environment.MachineName }
             });
-        })
-        .UseAzureMonitor(configureAzureMonitor =>
-        {
-            var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                configureAzureMonitor.ConnectionString = connectionString;
-                configureAzureMonitor.EnableLiveMetrics = true;
-            }
         })
         .WithTracing(tracing => tracing
             .AddAspNetCoreInstrumentation()
@@ -109,8 +101,10 @@ builder.Services.AddOpenTelemetry()
             options.ExportProcessorType = ExportProcessorType.Simple;
             Console.WriteLine($"OpenTelemetry Traces Endpoint: {options.Endpoint}");
         }))
-            .WithMetrics(metrics => metrics
+        .WithMetrics(metrics => metrics
             .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddConsoleExporter()
         .AddOtlpExporter(options =>
         {
             var otlpEndpoint = builder.Configuration.GetSection("OpenTelemetry:Endpoint").Value ?? "http://localhost:4318";
@@ -118,9 +112,21 @@ builder.Services.AddOpenTelemetry()
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.ExportProcessorType = ExportProcessorType.Simple;
             Console.WriteLine($"OpenTelemetry Metrics Endpoint: {options.Endpoint}");
-        })
-            .AddHttpClientInstrumentation()
-            .AddConsoleExporter());
+        }))
+        .UseAzureMonitor(configureAzureMonitor =>
+        {
+            var connectionString = builder.Configuration.GetSection("ApplicationInsights:ConnectionString").Value;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                configureAzureMonitor.ConnectionString = connectionString;
+                configureAzureMonitor.EnableLiveMetrics = true;
+                Console.WriteLine("Azure Monitor configurado para Application Insights");
+            }
+            else
+            {
+                Console.WriteLine("Application Insights não configurado - ConnectionString vazia");
+            }
+        });
 
 builder.Logging.AddOpenTelemetry(options =>
 {
