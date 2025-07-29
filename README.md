@@ -43,6 +43,10 @@ Projeto criado para testar a conexão com o MongoDB utilizando o Entity Framewor
 └──────────────────┘                                                         └─────────────────┘
 ```
 
+### Como funciona dentro do Open Telemetry
+
+![otel](./docs/OTel.png)
+
 ### Componentes
 - **API**: Aplicação .NET com endpoints para gerenciar Boats e Marinas
 - **MongoDB**: Banco de dados para persistência
